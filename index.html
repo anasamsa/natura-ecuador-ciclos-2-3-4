@@ -253,7 +253,7 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
           <p class="opt__t">Consultoras distintas en cada ciclo</p>
           <p class="opt__d">Dos sets en total. El ciclo 4 estrena sus propias protagonistas.</p>
         </div>
-        <p class="eje__foot">Diferencia entre A y B: <b>$2.975.000</b> antes de IVA.</p>
+        <p class="eje__foot">Diferencia entre A y B: <b>$2.975.000 + IVA</b>.</p>
       </div>
       <div class="eje reveal">
         <p class="eje__k">La fecha</p>
@@ -283,7 +283,7 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
   <div class="wrap">
     <p class="seclabel reveal">Qué se produce</p>
     <h2 class="sectitle reveal">Pieza por pieza, con todo su alcance</h2>
-    <p class="secsub reveal">Los valores son por unidad y no incluyen IVA. En cada pieza está lo que entra y lo que no, para que no haya sorpresas después.</p>
+    <p class="secsub reveal">Los valores son por unidad, + IVA. En cada pieza está lo que entra y lo que no, para que no haya sorpresas después.</p>
 
     <div class="comp reveal">
       <div class="comp__head">
@@ -458,7 +458,7 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
   <div class="wrap">
     <p class="seclabel reveal">Los dos caminos</p>
     <h2 class="sectitle reveal">Cuánto cuesta cada escenario</h2>
-    <p class="secsub reveal">Los dos incluyen la campaña completa de los tres ciclos con ambos videos. Lo único que cambia es si el set fotográfico se produce una o dos veces.</p>
+    <p class="secsub reveal">Los dos incluyen todas las imágenes de los tres ciclos. Cambia si el set fotográfico se produce una o dos veces, y qué videos se suman: los dos, uno solo o ninguno.</p>
 
     <div class="picker reveal">
       <div class="ctl">
@@ -468,25 +468,35 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
           <button type="button" data-esc="A" aria-pressed="false">A · distintas</button>
         </div>
       </div>
+      <div class="ctl">
+        <span>Videos héroe</span>
+        <div class="seg" role="group" aria-label="Videos">
+          <button type="button" data-vid="2" aria-pressed="true">Ambos</button>
+          <button type="button" data-vid="c" aria-pressed="false">Casting</button>
+          <button type="button" data-vid="s" aria-pressed="false">2D</button>
+          <button type="button" data-vid="0" aria-pressed="false">Sin video</button>
+        </div>
+      </div>
     </div>
 
     <div class="res reveal">
       <div class="res__main">
         <p class="res__k">Este escenario</p>
         <p class="res__v num" id="resV">$14.875.000</p>
-        <p class="res__iva">más IVA del 19%</p>
+        <p class="res__iva">+ IVA</p>
         <p class="res__d" id="resD"></p>
       </div>
       <div class="res__cyc">
         <div class="res__row"><span>Ciclo 2 · Arranque de campaña</span><b class="num" id="rc2"></b></div>
         <div class="res__row"><span>Ciclo 3 · Brindes</span><b class="num" id="rc3"></b></div>
         <div class="res__row"><span>Ciclo 4 · Cierre</span><b class="num" id="rc4"></b></div>
+        <div class="res__row"><span>Videos héroe</span><b class="num" id="rcv"></b></div>
       </div>
     </div>
 
     <div class="opts reveal" id="opts"></div>
 
-    <p class="note">Valores en pesos colombianos, antes de IVA.</p>
+    <p class="note">Valores en pesos colombianos + IVA.</p>
   </div>
 </section>
 
@@ -537,14 +547,16 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 (function(){
   "use strict";
   var P={set:2975000,por:1050000,brEC:1750000,vc:4375000,vs:2625000};
-  var esc="B";
+  var esc="B", vid="2";
   var f=new Intl.NumberFormat("es-CO",{maximumFractionDigits:0});
   function m(n){return "$"+f.format(n);}
-  function c2(){return P.set+P.por+P.vc+P.vs;}
+  function vv(v){return {"2":P.vc+P.vs,"c":P.vc,"s":P.vs,"0":0}[v];}
+  function c2(){return P.set+P.por;}
   function c3(){return P.brEC+P.por;}
   function c4(e){return e==="A"?P.set+P.por:P.por;}
-  function tot(e){return c2()+c3()+c4(e);}
-  var DESC={A:"Consultoras distintas en cada ciclo",B:"Las mismas consultoras en los dos ciclos"};
+  function tot(e){return c2()+c3()+c4(e)+vv(vid);}
+  var DESC={A:"Consultoras distintas en cada ciclo",B:"Las mismas consultoras en los dos ciclos"},
+      DESV={"2":"con los dos videos","c":"con el video con casting","s":"con el video 2D","0":"sin videos"};
   var COMBOS=["B","A"];
 
   function render(){
@@ -552,17 +564,18 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
     document.getElementById("rc2").textContent=m(c2());
     document.getElementById("rc3").textContent=m(c3());
     document.getElementById("rc4").textContent=m(c4(esc));
-    document.getElementById("resD").textContent=DESC[esc]+", con los dos videos.";
+    document.getElementById("rcv").textContent=vv(vid)?m(vv(vid)):"—";
+    document.getElementById("resD").textContent=DESC[esc]+", "+DESV[vid]+".";
     var box=document.getElementById("opts"); box.textContent="";
     COMBOS.forEach(function(k){
       var b=document.createElement("button");
       b.type="button"; b.className="opt-row"+(k===esc?" on":"");
       var l=document.createElement("span"); l.className="l";
       l.appendChild(document.createTextNode("Escenario "+k));
-      var e=document.createElement("em"); e.textContent=DESC[k];
+      var e=document.createElement("em"); e.textContent=DESC[k]+", "+DESV[vid];
       l.appendChild(e); b.appendChild(l);
       var pz=document.createElement("span"); pz.className="p num";
-      pz.textContent=m(tot(k)); b.appendChild(pz);
+      pz.textContent=m(tot(k))+" + IVA"; b.appendChild(pz);
       b.addEventListener("click",function(){ esc=k; sync(); render(); });
       box.appendChild(b);
     });
@@ -570,7 +583,11 @@ a:focus-visible{outline:3px solid var(--green);outline-offset:2px}
   function sync(){
     document.querySelectorAll("[data-esc]").forEach(function(b){
       b.setAttribute("aria-pressed",String(b.getAttribute("data-esc")===esc));});
+    document.querySelectorAll("[data-vid]").forEach(function(b){
+      b.setAttribute("aria-pressed",String(b.getAttribute("data-vid")===vid));});
   }
+  document.querySelectorAll("[data-vid]").forEach(function(b){
+    b.addEventListener("click",function(){ vid=b.getAttribute("data-vid"); sync(); render(); });});
   document.querySelectorAll("[data-esc]").forEach(function(b){
     b.addEventListener("click",function(){ esc=b.getAttribute("data-esc"); sync(); render(); });});
   render();
